@@ -12,12 +12,31 @@ class ConfigParser:
 		self._heirachy = [i.rstrip(" ").lstrip(" ").lstrip("\t") for i in self._heirachy if i != '']
 			
 	def _remove_comments(self):
+		block_comment = False
 		for i, k in enumerate(self._heirachy):
-			comment_index = k.find("//")
-			if comment_index != -1:
-				string_start, string_end = min(k.find('"'), k.find("'")), max(k.rfind('"'), k.rfind("'"))
-				if not string_start <= comment_index <= string_end:
-					self._heirachy[i] = k[:comment_index]
+			if block_comment:
+				block_comment_end = k.find("*/")
+				if block_comment_end != -1:
+					self._heirachy[i] = k[block_comment_end+2:]
+					block_comment = False
+				else:
+					self._heirachy[i] = ""
+			else:
+				block_comment_start = k.find("/*")
+				if block_comment_start != -1:
+					block_comment_end = k.find("*/")
+					if block_comment_end != -1:
+						self._heirachy[i] = k[:block_comment_start] + k[block_comment_end+2:]
+					else:
+						block_comment = True
+						print(block_comment)
+						self._heirachy[i] = k[:block_comment_start]
+				else:
+					comment_index = k.find("//")
+					if comment_index != -1:
+						string_start, string_end = min(k.find('"'), k.find("'")), max(k.rfind('"'), k.rfind("'"))
+						if not string_start <= comment_index <= string_end:
+							self._heirachy[i] = k[:comment_index]
 		self._remove_blank_lines()
 
 configuration = ConfigParser()
