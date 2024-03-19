@@ -84,6 +84,10 @@ class ConfigParser:
 							add = True
 							add_index = i
 		self._remove_blank_lines()
+		self._remove_trailing_whitespace()
+
+	def _remove_trailing_whitespace(self):
+		self._heirachy = [i.rstrip("\n").rstrip(" ") for i in self._heirachy]
 
 configuration = ConfigParser()
 configuration.read("basic-configuration-example.conf")
