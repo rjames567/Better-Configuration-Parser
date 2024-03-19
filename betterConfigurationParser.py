@@ -15,6 +15,7 @@ class ConfigParser:
 
 		self._remove_comments()
 		self._flatten_split_lines()
+		self._split_variables()
 
 	def _remove_blank_lines(self):
 		self._heirachy = [i.rstrip(" ").lstrip(" ").lstrip("\t") for i in self._heirachy if i != '' and i != "\n"]
@@ -89,5 +90,11 @@ class ConfigParser:
 	def _remove_trailing_whitespace(self):
 		self._heirachy = [i.rstrip("\n").rstrip(" ") for i in self._heirachy]
 
+	def _split_variables(self):
+		self._processed_heirachy = [i.split("=") for i in self._heirachy]
+		self._processed_heirachy = [tuple(k.lstrip(" ").rstrip(" ") for k in i) for i in self._processed_heirachy]
+
 configuration = ConfigParser()
 configuration.read("basic-configuration-example.conf")
+
+print(configuration._processed_heirachy)
