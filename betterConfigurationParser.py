@@ -11,40 +11,40 @@ class ConfigParser:
 
     def read(self, filename):
         with open(filename, 'r') as f:
-            self._heirachy = [i for i in f.readlines()]
+            self._hierarchy = [i for i in f.readlines()]
 
         self._remove_comments()
         self._flatten_split_lines()
         self._split_variables()
 
     def _remove_blank_lines(self):
-        self._heirachy = [i.rstrip(" ") for i in self._heirachy if i != '' and i != "\n"]
+        self._hierarchy = [i.rstrip(" ") for i in self._hierarchy if i != '' and i != "\n"]
 
     def _remove_comments(self):
         block_comment = False
-        for i, k in enumerate(self._heirachy):
+        for i, k in enumerate(self._hierarchy):
             if block_comment:
                 block_comment_end = k.find("*/")
                 if block_comment_end != -1:
-                    self._heirachy[i] = k[block_comment_end + 2:]
+                    self._hierarchy[i] = k[block_comment_end + 2:]
                     block_comment = False
                 else:
-                    self._heirachy[i] = ""
+                    self._hierarchy[i] = ""
             else:
                 block_comment_start = k.find("/*")
                 if block_comment_start != -1:
                     block_comment_end = k.find("*/")
                     if block_comment_end != -1:
-                        self._heirachy[i] = k[:block_comment_start] + k[block_comment_end + 2:]
+                        self._hierarchy[i] = k[:block_comment_start] + k[block_comment_end + 2:]
                     else:
                         block_comment = True
-                        self._heirachy[i] = k[:block_comment_start]
+                        self._hierarchy[i] = k[:block_comment_start]
                 else:
                     comment_index = k.find("//")
                     if comment_index != -1:
                         string_start, string_end = min(k.find('"'), k.find("'")), max(k.rfind('"'), k.rfind("'"))
                         if not string_start <= comment_index <= string_end:
-                            self._heirachy[i] = k[:comment_index]
+                            self._hierarchy[i] = k[:comment_index]
         self._remove_blank_lines()
 
     def _flatten_split_lines(self):
@@ -53,9 +53,9 @@ class ConfigParser:
         multiline_string = False
         remove_whitespace = False
         remove_whitespace_change = False
-        for i, k in enumerate(self._heirachy):
+        for i, k in enumerate(self._hierarchy):
             temp = k.rstrip("\n")
-            if i < len(self._heirachy):
+            if i < len(self._hierarchy):
                 if (temp.rstrip("\\")[-3:] in self._multiline_openings.keys() or multiline_string) and temp[-1] == "\\":
                     remove_whitespace = True
                     remove_whitespace_change = True
@@ -67,8 +67,8 @@ class ConfigParser:
                         remove_whitespace = False
                     else:
                         k = k[:-1]  # Otherwise removes last of the 3 quotation marks
-                if i + 1 < len(self._heirachy):
-                    if self._heirachy[i + 1][-3:] in self._multiline_openings.values() or not multiline_string:
+                if i + 1 < len(self._hierarchy):
+                    if self._hierarchy[i + 1][-3:] in self._multiline_openings.values() or not multiline_string:
                         add_string = k.rstrip("\n")
                     else:
                         add_string = k
@@ -78,23 +78,23 @@ class ConfigParser:
                     add = False
                     multiline_string = False
                     add_string = k.rstrip("\n")
-                self._heirachy[add_index] += add_string
-                self._heirachy[i] = ""
+                self._hierarchy[add_index] += add_string
+                self._hierarchy[i] = ""
             else:
                 elems = k.split("=")
                 if len(elems) == 2:
                     var = elems[1].lstrip(" ")
                     opening = None
-                    line = self._heirachy[i].rstrip("\n")
+                    line = self._hierarchy[i].rstrip("\n")
                     if remove_whitespace and remove_whitespace_change:
                         line = line[:-1]
                     if var[0] in self._multiline_openings.keys():
                         opening = var[0]
-                        self._heirachy[i] = line
+                        self._hierarchy[i] = line
                     elif var.rstrip("\\")[:3] in self._multiline_openings.keys():
                         opening = var.rstrip("/")[:3]
                         multiline_string = True
-                        self._heirachy[i] = line
+                        self._hierarchy[i] = line
                     if opening:
                         location = var.find(self._multiline_openings[opening])
                         if location <= 0:
@@ -105,14 +105,14 @@ class ConfigParser:
         self._remove_trailing_whitespace()
 
     def _remove_trailing_whitespace(self):
-        self._heirachy = [i.rstrip("\n").rstrip(" ") for i in self._heirachy]
+        self._hierarchy = [i.rstrip("\n").rstrip(" ") for i in self._hierarchy]
 
     def _split_variables(self):
-        self._processed_heirachy = [i.split("=") for i in self._heirachy]
-        self._processed_heirachy = [tuple(k.lstrip(" ").rstrip(" ") for k in i) for i in self._processed_heirachy]
+        self._processed_hierarchy = [i.split("=") for i in self._hierarchy]
+        self._processed_hierarchy = [tuple(k.lstrip(" ").rstrip(" ") for k in i) for i in self._processed_hierarchy]
 
 
 configuration = ConfigParser()
 configuration.read("basic-configuration-example.conf")
 
-print(configuration._heirachy)
+print(configuration._hierarchy)
