@@ -140,10 +140,10 @@ class ConfigParser:
         self._processed_hierarchy = [i.split("=") for i in self._hierarchy]
         self._processed_hierarchy = [tuple(k.lstrip(" ").rstrip(" ") for k in i) for i in self._processed_hierarchy]
 
+    def output_configuration(self):
+        for i, k in self._processed_hierarchy:
+            print(f"{i}: {k}")
+
 
 configuration = ConfigParser()
 configuration.read("basic-configuration-example.conf")
-
-print(configuration._processed_hierarchy[22:])
-for i, k in configuration._processed_hierarchy[22:]:
-    print(f"{i}: {k}")
