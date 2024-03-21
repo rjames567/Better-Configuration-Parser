@@ -138,7 +138,7 @@ class ConfigParser:
 
     def _split_variables(self):
         self._hierarchy = [i.split("=") for i in self._hierarchy]
-        self._hierarchy = [tuple(k.lstrip(" ").rstrip(" ") for k in i) for i in self._heirarchy]
+        self._hierarchy = [tuple(k.lstrip(" ").rstrip(" ") for k in i) for i in self._hierarchy]
 
     def output_configuration(self):
         for i, k in self._hierarchy:
