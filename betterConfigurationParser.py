@@ -1,3 +1,9 @@
+import enum
+
+class _StringTypes(enum.Enum):
+    RAW = enum.auto()
+    STRING = enum.auto()
+
 class ConfigParser:
     def __init__(self):
         # Key is the opening, and the value is the closing
@@ -9,13 +15,36 @@ class ConfigParser:
             "(": ")"
         }
 
+        self._escape_code_string_lookup = {
+            "\\n": "\n",
+            "\\t": "\t",
+            "\\r": "\r"
+        }
+
     def read(self, filename):
-        with open(filename, 'r') as f:
-            self._hierarchy = [i for i in f.readlines()]
+        with open(filename, 'r', encoding='utf-8') as f:
+            self._hierarchy = [i for i in f]
 
         self._remove_comments()
         self._flatten_split_lines()
+        self._remove_escape_code()
+
         self._split_variables()
+
+    @classmethod
+    def _check_string(cls, var):
+        if (var[:3] == "'''" and var[-3:] == "'''") or (var[0] == "'" and var[-1] == "'"):
+            return _StringTypes.RAW
+        elif (var[:3] == '"""' and var[-3:] == '"""') or (var[0] == '"' and var[-1] == '"'):
+            return _StringTypes.STRING
+        else:
+            return False
+
+    def _remove_escape_code(self):
+        for i, k in zip(self._escape_code_string_lookup.keys(), self._escape_code_string_lookup.values()):
+            for j, l in enumerate(self._hierarchy):
+                if ConfigParser._check_string(l.split("=")[1].strip()) == _StringTypes.STRING:
+                    self._hierarchy[j] = self._hierarchy[j].replace(i, k)
 
     def _remove_blank_lines(self):
         self._hierarchy = [i.rstrip(" ") for i in self._hierarchy if i != '' and i != "\n"]
@@ -115,4 +144,6 @@ class ConfigParser:
 configuration = ConfigParser()
 configuration.read("basic-configuration-example.conf")
 
-print(configuration._hierarchy)
+print(configuration._processed_hierarchy[22:])
+for i, k in configuration._processed_hierarchy[22:]:
+    print(f"{i}: {k}")
